@@ -1,0 +1,86 @@
+<link rel="import" href="solr-toggle-icon.html">
+<link rel="import" href="solr-info-field.html">
+<link rel="import" href="../polymer-ui-collapsible/polymer-ui-collapsible.html">
+<link rel="import" href="../polymer-ui-icon/polymer-ui-icon.html">
+<link rel="import" href="../polymer-ui-ratings/polymer-ui-ratings.html">
+
+<polymer-element name="solr-doc-info" attributes="doc active hideFavoriteIcon">
+    <template>
+        <link rel="stylesheet" href="../polymer-flex-layout/polymer-flex-layout.css">
+        <style>
+            :host {
+            }
+            .thumbnail {
+                width: 195px;
+                height: 195px;
+            }
+            .info {
+                height: 195px;
+                padding-left: 10px;
+                color: #555;
+            }
+            .title {
+                font-size: 16px;
+                font-weight: 600;
+            }
+            .authors {
+                padding-top: 10px;
+                opacity: 0.8;
+            }
+            .publisher {
+                opacity: 0.6;
+            }
+            solr-toggle-icon {
+                padding-left: 10px;
+            }
+            .more-info {
+                padding-top: 20px;
+                color: #666;
+            }
+            .link-icon-container {
+                position: relative;
+                height: 24px;
+            }
+            .link-icon-container a {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+            polymer-ui-ratings {
+                pointer-events: none;
+            }
+        </style>
+
+        <div flexbox>
+            <div class="info" flex v-flexbox>
+                <div class="title" flexbox>
+                    <div flex>{{doc.name}}</div>
+                    <solr-toggle-icon src="assets/ic_favorite_darkalt.png"
+                                    activeSrc="assets/ic_favorite_darkreg.png" hidden?="{{hideFavoriteIcon}}"
+                    on-tap="{{toggleFavorite}}"></solr-toggle-icon>
+                </div>
+                <div class="authors">{{doc.manu}}</div>
+                <div flex></div>
+                <div class="publisher">{{doc.price}}</div>
+            </div>
+        </div>
+
+        <polymer-ui-collapsible class="more-info" active="{{active}}">
+            <div class="link-icon-container">
+                <a target="_blank" href="{{doc.infoLink}}">
+                    <polymer-ui-icon icon="shortcut" theme="polymer-ui-light-theme"></polymer-ui-icon>
+                </a>
+            </div>
+            <solr-info-field label="Name" value="{{doc.name}}"></solr-info-field>
+        </polymer-ui-collapsible>
+    </template>
+    <script>
+        Polymer('solr-doc-info', {
+            hideFavoriteIcon: false,
+            toggleFavorite: function(e, detail, sender) {
+                this.fire('solr-doc-favorite-toggle',
+                        {doc: this.doc, active: sender.active});
+            }
+        });
+    </script>
+</polymer-element>

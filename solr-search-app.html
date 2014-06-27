@@ -1,0 +1,193 @@
+<link rel="import" href="../polymer-ui-toolbar/polymer-ui-toolbar.html">
+<link rel="import" href="../polymer-ui-icon-button/polymer-ui-icon-button.html">
+<link rel="import" href="../polymer-ui-icon/polymer-ui-icon.html">
+<link rel="import" href="../polymer-ui-field/polymer-ui-field.html">
+<link rel="import" href="../polymer-ui-menu/polymer-ui-menu.html">
+<link rel="import" href="../polymer-ui-menu-button/polymer-ui-menu-button.html">
+<link rel="import" href="../polymer-ui-menu-item/polymer-ui-menu-item.html">
+<link rel="import" href="../polymer-ui-pages/polymer-ui-pages.html">
+<link rel="import" href="../polymer-grid-layout/polymer-grid-layout.html">
+<link rel="import" href="../polymer-localstorage/polymer-localstorage.html">
+<link rel="import" href="../solr-search/solr-search.html">
+
+<link rel="import" href="solr-docs-view.html">
+
+<polymer-element name="solr-search-app">
+    <template>
+        <style>
+            :host {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
+                -webkit-touch-callout: none;
+            }
+            #sidebar {
+                width: 200px;
+                -webkit-transition: left ease-in .1s;
+                transition: left ease-out .1s;
+                background: #fff;
+                z-index: 2;
+            }
+            .sidebar-title {
+                color: #999;
+                padding: 0 14px;
+            }
+            .sidebar-menu-selected {
+                color: #4285f4;
+                opacity: 1;
+            }
+            #scrim {
+                background-color: rgba(128, 128, 128, 0.5);
+                z-index: 1;
+            }
+            polymer-ui-toolbar#toolbar {
+                background: #4285f4 !important;
+                z-index: 1 !important;
+            }
+            polymer-ui-field {
+                background: white;
+                height: 40px;
+                width: 300px;
+                margin: 10px;
+            }
+            polymer-ui-menu-button {
+                padding-right: 10px;
+            }
+            polymer-ui-pages {
+                display: block;
+                height: 100%;
+            }
+            polymer-ui-pages > * {
+                display: block;
+                background: #f2f2f2;
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .loading-icon {
+                display: none;
+                position: absolute;
+                bottom: 50%;
+                left: 50%;
+                width: 160px;
+                height: 160px;
+                margin: -80px;
+                background: url(assets/loading.png);
+                z-index: 1;
+            }
+            .loading-icon[loading] {
+                display: block;
+            }
+            [hidden] {
+                visibility: hidden;
+            }
+        </style>
+
+        <polymer-ui-toolbar id="toolbar" offscreen="basement" theme="polymer-ui-light-theme">
+            <polymer-ui-icon-button icon="menu" on-tap="{{toggleMenu}}" ></polymer-ui-icon-button>
+            <div flex></div>
+            <polymer-ui-field hidden?="{{viewSelected}}">
+            <polymer-ui-icon icon="search"></polymer-ui-icon>
+            <input id="input" placeholder="Search docs" value="{{query}}" flex x-webkit-speech on-change="{{search}}">
+            </polymer-ui-field>
+            <polymer-ui-menu-button selected="{{bioTypeSelected}}" halign="right" icon="filter" hidden?="{{viewSelected}}">
+            <polymer-ui-menu-item name="wanted" label="Most Wanted"></polymer-ui-menu-item>
+            <polymer-ui-menu-item name="deceased" label="Deceased"></polymer-ui-menu-item>
+            <polymer-ui-menu-item name="all" label="All"></polymer-ui-menu-item>
+            </polymer-ui-menu-button>
+            <div flex></div>
+        </polymer-ui-toolbar>
+
+        <div id="main" offscreen="basement">
+            <polymer-ui-pages selected="{{viewSelected}}">
+
+                <solr-docs-view id="searchView" docs="{{docs}}" on-ic-bio-favorite-toggle="{{toggleFavorite}}"></solr-docs-view>
+                <solr-docs-view id="favoritesView" bios="{{favorites}}" hideFavoriteIcon swipeable
+                              on-doc-favorite-remove="{{removeFavorite}}"></solr-docs-view>
+            </polymer-ui-pages>
+        </div>
+
+        <div id="sidebar" offscreen="left" theme="polymer-ui-dark-icon">
+            <polymer-ui-toolbar><div class="sidebar-title">bios</div></polymer-ui-toolbar>
+            <polymer-ui-menu selected="{{viewSelected}}" on-polymer-activate="{{menuActivate}}" selectedClass="sidebar-menu-selected">
+                <polymer-ui-menu-item label="Search"></polymer-ui-menu-item>
+                <polymer-ui-menu-item label="Favorites"></polymer-ui-menu-item>
+            </polymer-ui-menu>
+        </div>
+
+        <div id="scrim" on-tap="{{toggleMenu}}" offscreen="right"></div>
+
+        <div class="loading-icon" loading?="{{loading}}"></div>
+
+        <polymer-grid-layout nodes="{{layoutNodes}}" layout="{{layout}}"></polymer-grid-layout>
+
+        <solr-search id="solrSearch"
+                     url="http://localhost:8983/solr/collection1/select/"
+                     query="{{query}}"
+                     on-solr-response="{{gotdocs}}">
+        </solr-search>
+
+        <polymer-localstorage name="bio-search" value="{{favorites}}"></polymer-localstorage>
+    </template>
+    <script>
+        Polymer('solr-search-app', {
+            viewSelected: 0,
+            query: '',
+            bioTypeSelected: 'all',
+            layouts: {
+                main:[
+                    [1, 1],
+                    [2, 2],
+                    [2, 2]
+                ],
+                menu: [
+                    [3, 4],
+                    [3, 4],
+                    [3, 4]
+                ]
+            },
+            ready: function() {
+                this.layoutNodes = [this.$.toolbar, this.$.main,
+                    this.$.sidebar, this.$.scrim];
+                this.toggleMenu();
+            },
+            toggleMenu: function() {
+                this.layout = this.layout === this.layouts.main ?
+                        this.layouts.menu : this.layouts.main;
+            },
+            menuActivate: function() {
+                this.async('toggleMenu');
+            },
+            bioTypeSelectedChanged: function() {
+                this.async('search');
+            },
+            search: function() {
+                this.loading = true;
+                this.$.input.blur();
+                this.$.solrSearch.go();
+            },
+            gotdocs: function(e, detail) {
+                this.loading = false;
+                this.$.searchView.selected = null;
+                this.$.searchView.scrollTop = 0;
+                this.docs = detail.response.response.docs;
+                console.log(JSON.stringify(this.docs));
+            },
+            toggleFavorite: function(e, detail) {
+                this.favorites = this.favorites || [];
+                if (detail.active) {
+                    this.favorites.push(detail.bio);
+                } else {
+                    var i = this.favorites.indexOf(detail.bio);
+                    if (i >= 0) {
+                        this.favorites.splice(i, 1);
+                    }
+                }
+            },
+            removeFavorite: function(e, detail, sender) {
+                this.toggleFavorite(e, {active: false, bio: detail.bio});
+            }
+        });
+    </script>
+</polymer-element>

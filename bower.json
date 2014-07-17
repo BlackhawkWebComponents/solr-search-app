@@ -4,7 +4,7 @@
   "dependencies": {
     "platform": "Polymer/platform#master",
     "core-selector": "Polymer/core-selector#master",
-    "core-grid-layout": "Polymer/core-grid-layout#master",
+    "core-layout-grid": "Polymer/core-layout-grid#master",
     "polymer-flex-layout": "PolymerLabs/polymer-flex-layout#master",
     "core-localstorage": "Polymer/core-localstorage#master",
     "core-toolbar": "Polymer/core-toolbar#master",

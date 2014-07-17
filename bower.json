@@ -15,7 +15,7 @@
     "polymer-ui-card": "Polymer/polymer-ui-card#master",
     "polymer-ui-ratings": "PolymerLabs/polymer-ui-ratings#master",
     "core-menu-button": "Polymer/core-menu-button#master",
-    "core-item": "Polymer/core-menu-item#master",
+    "core-item": "Polymer/core-item#master",
     "core-menu": "Polymer/core-menu#master",
     "core-pages": "Polymer/core-pages#master",
     "polymer-ui-base": "PolymerLabs/polymer-ui-base#master"

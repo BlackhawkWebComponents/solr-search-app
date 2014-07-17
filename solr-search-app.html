@@ -123,7 +123,7 @@
         <core-layout-grid nodes="{{layoutNodes}}" layout="{{layout}}"></core-layout-grid>
 
         <core-ajax id="solrSearch"
-                   url="http://localhost:8983/solr/collection1/select/?indent=on&wt=json&q={{query}}"
+                   url="http://cloudfortressinc.com:8983/solr/collection1/select/?indent=on&wt=json&q={{query}}"
                    on-core-response="{{gotdocs}}"
                    handleAs="json" ></core-ajax>
 

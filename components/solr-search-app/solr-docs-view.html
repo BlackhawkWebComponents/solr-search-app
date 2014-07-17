@@ -1,0 +1,90 @@
+<link rel="import" href="../core-selector/core-selector.html">
+<link rel="import" href="../polymer-ui-card/polymer-ui-card.html">
+<link rel="import" href="solr-doc-info.html">
+
+<polymer-element name="solr-docs-view" attributes="docs selected hideFavoriteIcon swipeable">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+            .doc-lists {
+                display: block;
+                width: 960px;
+                margin: 0 auto;
+            }
+            .doc-list {
+                display: inline-block;
+                width: 50%;
+                float: left;
+                vertical-align: top;
+                padding: 10px 0;
+            }
+            polymer-ui-card {
+                display: inline-block;
+                width: 420px;
+                min-height: 195px;
+                padding: 20px;
+                margin: 10px;
+            }
+            solr-doc-info {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+            @media screen and (max-width: 1000px) {
+                .doc-lists {
+                    width: 480px;
+                }
+                .doc-list {
+                    width: 100%;
+                    padding: 0;
+                }
+            }
+            @media screen and (max-width: 500px) {
+                .doc-lists {
+                    width: auto;
+                }
+                .doc-list {
+                    display: block;
+                    float: none;
+                }
+                polymer-ui-card {
+                    display: block;
+                    width: auto;
+                }
+            }
+        </style>
+
+        <core-selector target="{{$.docLists}}" multi itemsSelector="solr-doc-info"
+                          selected="{{selected}}"></core-selector>
+
+        <div id="docLists" class="doc-lists">
+            <template repeat="{{column in columns}}">
+                <div class="doc-list">
+                    <template repeat="{{doc in column}}">
+                        <polymer-ui-card swipeable="{{swipeable}}" on-polymer-card-swipe-away="{{swipeAway}}">
+                            <solr-doc-info doc="{{doc}}" hideFavoriteIcon="{{hideFavoriteIcon}}"></solr-doc-info>
+                        </polymer-ui-card>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </template>
+    <script>
+        Polymer('solr-docs-view', {
+            swipeable: false,
+            hideFavoriteIcon: false,
+            docsChanged: function() {
+                this.columns = [[], []];
+                this.docs && this.docs.forEach(function(b, i) {
+                    this.columns[i & 1].push(b);
+                }, this);
+            },
+            swipeAway: function(e, detail, sender) {
+                this.fire('doc-favorite-remove',
+                        {doc: sender.templateInstance.model.doc});
+            }
+        })
+    </script>
+</polymer-element>

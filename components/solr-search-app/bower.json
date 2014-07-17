@@ -1,0 +1,25 @@
+{
+  "name": "solr-search-app",
+  "private": true,
+  "dependencies": {
+    "platform": "Polymer/platform#master",
+    "core-selector": "Polymer/core-selector#master",
+    "core-layout-grid": "Polymer/core-layout-grid#master",
+    "polymer-flex-layout": "PolymerLabs/polymer-flex-layout#master",
+    "core-localstorage": "Polymer/core-localstorage#master",
+    "core-toolbar": "Polymer/core-toolbar#master",
+    "core-icon": "Polymer/core-icon#master",
+    "core-icon-button": "Polymer/core-icon-button#master",
+    "core-field": "Polymer/core-field#master",
+    "core-ajax": "Polymer/core-ajax#master",
+    "core-collapse": "Polymer/core-collapse#master",
+    "polymer-ui-card": "Polymer/polymer-ui-card#master",
+    "polymer-ui-base-css": "PolymerLabs/polymer-ui-base",
+    "polymer-ui-ratings": "PolymerLabs/polymer-ui-ratings#master",
+    "core-menu-button": "Polymer/core-menu-button#master",
+    "core-item": "Polymer/core-item#master",
+    "core-menu": "Polymer/core-menu#master",
+    "core-pages": "Polymer/core-pages#master",
+    "polymer-ui-base": "PolymerLabs/polymer-ui-base#master"
+  }
+}

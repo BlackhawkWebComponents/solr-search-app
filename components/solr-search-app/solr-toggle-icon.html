@@ -1,0 +1,23 @@
+<link rel="import" href="../core-icon/core-icon.html">
+
+<polymer-element name="solr-toggle-icon" attributes="active src activeSrc" on-tap="{{toggle}}">
+    <template>
+        <core-icon id="icon"></core-icon>
+    </template>
+    <script>
+        Polymer('solr-toggle-icon', {
+            active: false,
+            ready: function() {
+                this.activeChanged();
+            },
+            activeChanged: function() {
+                this.$.icon.src = this.resolvePath(
+                        this.active ? this.activeSrc : this.src);
+            },
+            toggle: function(e) {
+                this.active = !this.active;
+                e.stopPropagation();
+            }
+        });
+    </script>
+</polymer-element>

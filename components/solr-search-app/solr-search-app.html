@@ -1,0 +1,204 @@
+<link rel="import" href="../core-toolbar/core-toolbar.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
+<link rel="import" href="../core-icon/core-icon.html">
+<link rel="import" href="../core-field/core-field.html">
+<link rel="import" href="../core-menu/core-menu.html">
+<link rel="import" href="../core-menu-button/core-menu-button.html">
+<link rel="import" href="../core-item/core-item.html">
+<link rel="import" href="../core-pages/core-pages.html">
+<link rel="import" href="../core-layout-grid/core-layout-grid.html">
+<link rel="import" href="../core-localstorage/core-localstorage.html">
+<link rel="import" href="../core-ajax/core-ajax.html">
+
+<link rel="import" href="solr-docs-view.html">
+
+<!--
+Element providing example of Solr Search with results
+
+##### Example
+
+<solr-search-app class="polymer-ui-fit"></solr-search-app>
+
+@element solr-search
+@blurb Element providing example of Solr Search with results
+@status alpha
+@url http://blackhawkwebcomponents.github.io/solr-search-app
+-->
+<polymer-element name="solr-search-app">
+    <template>
+        <style>
+            :host {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
+                -webkit-touch-callout: none;
+            }
+            #sidebar {
+                width: 200px;
+                -webkit-transition: left ease-in .1s;
+                transition: left ease-out .1s;
+                background: #fff;
+                z-index: 2;
+            }
+            .sidebar-title {
+                color: #999;
+                padding: 0 14px;
+            }
+            .sidebar-menu-selected {
+                color: #4285f4;
+                opacity: 1;
+            }
+            #scrim {
+                background-color: rgba(128, 128, 128, 0.5);
+                z-index: 1;
+            }
+            core-toolbar#toolbar {
+                background: #4285f4 !important;
+                z-index: 1 !important;
+            }
+            core-field {
+                background: white;
+                height: 40px;
+                width: 300px;
+                margin: 10px;
+            }
+            core-menu-button {
+                padding-right: 10px;
+            }
+            core-pages {
+                display: block;
+                height: 100%;
+            }
+            core-pages > * {
+                display: block;
+                background: #f2f2f2;
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .loading-icon {
+                display: none;
+                position: absolute;
+                bottom: 50%;
+                left: 50%;
+                width: 160px;
+                height: 160px;
+                margin: -80px;
+                background: url(assets/loading.png);
+                z-index: 1;
+            }
+            .loading-icon[loading] {
+                display: block;
+            }
+            [hidden] {
+                visibility: hidden;
+            }
+        </style>
+
+        <core-toolbar id="toolbar" offscreen="basement" theme="core-light-theme">
+            <core-icon-button icon="menu" on-tap="{{toggleMenu}}" ></core-icon-button>
+            <div flex></div>
+            <core-field hidden?="{{viewSelected}}">
+            <core-icon icon="search"></core-icon>
+            <input id="input" placeholder="Search docs" value="{{query}}" flex x-webkit-speech on-change="{{search}}">
+            </core-field>
+            <core-menu-button selected="{{docTypeSelected}}" halign="right" icon="filter" hidden?="{{viewSelected}}">
+            <core-item name="wanted" label="Most Wanted"></core-item>
+            <core-item name="deceased" label="Deceased"></core-item>
+            <core-item name="all" label="All"></core-item>
+            </core-menu-button>
+            <div flex></div>
+        </core-toolbar>
+
+        <div id="main" offscreen="basement">
+            <core-pages selected="{{viewSelected}}">
+
+                <solr-docs-view id="searchView" docs="{{docs}}" on-solr-doc-favorite-toggle="{{toggleFavorite}}"></solr-docs-view>
+                <solr-docs-view id="favoritesView" docs="{{favorites}}" hideFavoriteIcon swipeable
+                              on-doc-favorite-remove="{{removeFavorite}}"></solr-docs-view>
+            </core-pages>
+        </div>
+
+        <div id="sidebar" offscreen="left" theme="core-dark-icon">
+            <core-toolbar><div class="sidebar-title">docs</div></core-toolbar>
+            <core-menu selected="{{viewSelected}}" on-core-activate="{{menuActivate}}" selectedClass="sidebar-menu-selected">
+                <core-item label="Search"></core-item>
+                <core-item label="Favorites"></core-item>
+            </core-menu>
+        </div>
+
+        <div id="scrim" on-tap="{{toggleMenu}}" offscreen="right"></div>
+
+        <div class="loading-icon" loading?="{{loading}}"></div>
+
+        <core-layout-grid nodes="{{layoutNodes}}" layout="{{layout}}"></core-layout-grid>
+
+        <core-ajax id="solrSearch"
+                   url="http://cloudfortressinc.com:8983/solr/collection1/select/?indent=on&wt=json&q={{query}}"
+                   on-core-response="{{gotdocs}}"
+                   handleAs="json" ></core-ajax>
+
+        <core-localstorage name="doc-search" value="{{favorites}}"></core-localstorage>
+    </template>
+    <script>
+        Polymer('solr-search-app', {
+            viewSelected: 0,
+            query: '',
+            docTypeSelected: 'all',
+            layouts: {
+                main:[
+                    [1, 1],
+                    [2, 2],
+                    [2, 2]
+                ],
+                menu: [
+                    [3, 4],
+                    [3, 4],
+                    [3, 4]
+                ]
+            },
+            ready: function() {
+                this.layoutNodes = [this.$.toolbar, this.$.main,
+                    this.$.sidebar, this.$.scrim];
+                this.toggleMenu();
+            },
+            toggleMenu: function() {
+                this.layout = this.layout === this.layouts.main ?
+                        this.layouts.menu : this.layouts.main;
+            },
+            menuActivate: function() {
+                this.async('toggleMenu');
+            },
+            docTypeSelectedChanged: function() {
+                this.async('search');
+            },
+            search: function() {
+                this.loading = true;
+                this.$.input.blur();
+                this.$.solrSearch.go();
+            },
+            gotdocs: function(e, detail) {
+                this.loading = false;
+                this.$.searchView.selected = null;
+                this.$.searchView.scrollTop = 0;
+                this.docs = detail.response.response.docs;
+                //console.log(JSON.stringify(this.docs));
+            },
+            toggleFavorite: function(e, detail) {
+                this.favorites = this.favorites || [];
+                if (detail.active) {
+                    this.favorites.push(detail.doc);
+                } else {
+                    var i = this.favorites.indexOf(detail.doc);
+                    if (i >= 0) {
+                        this.favorites.splice(i, 1);
+                    }
+                }
+            },
+            removeFavorite: function(e, detail, sender) {
+                this.toggleFavorite(e, {active: false, doc: detail.doc});
+            }
+        });
+    </script>
+</polymer-element>

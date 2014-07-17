@@ -1,0 +1,22 @@
+<polymer-element name="solr-info-field" attributes="label value hideValue">
+    <template>
+        <style>
+            .title {
+                font-weight: 500;
+                opacity: 0.5;
+                padding: 20px 0 10px;;
+            }
+        </style>
+
+        <div hidden?="{{!value}}">
+        <div class="title">{{label}}</div>
+        <div hidden?="{{hideValue}}">{{value}}</div>
+        <content></content>
+        </div>
+    </template>
+    <script>
+        Polymer('solr-info-field', {
+            hideValue: false
+        });
+    </script>
+</polymer-element>

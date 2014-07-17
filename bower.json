@@ -1,0 +1,7 @@
+{
+  "name": "solr-search-app#gh-pages",
+  "private": true,
+  "dependencies": {
+    "solr-search-app": "BlackhawkWebComponents/solr-search-app#master"
+  }
+}

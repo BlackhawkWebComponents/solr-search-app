@@ -1,14 +1,15 @@
-<link rel="import" href="../polymer-ui-toolbar/polymer-ui-toolbar.html">
-<link rel="import" href="../polymer-ui-icon-button/polymer-ui-icon-button.html">
-<link rel="import" href="../polymer-ui-icon/polymer-ui-icon.html">
-<link rel="import" href="../polymer-ui-field/polymer-ui-field.html">
-<link rel="import" href="../polymer-ui-menu/polymer-ui-menu.html">
-<link rel="import" href="../polymer-ui-menu-button/polymer-ui-menu-button.html">
-<link rel="import" href="../polymer-ui-menu-item/polymer-ui-menu-item.html">
-<link rel="import" href="../polymer-ui-pages/polymer-ui-pages.html">
-<link rel="import" href="../polymer-grid-layout/polymer-grid-layout.html">
-<link rel="import" href="../polymer-localstorage/polymer-localstorage.html">
+<link rel="import" href="../core-toolbar/core-toolbar.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
+<link rel="import" href="../core-icon/core-icon.html">
+<link rel="import" href="../core-field/core-field.html">
+<link rel="import" href="../core-menu/core-menu.html">
+<link rel="import" href="../core-menu-button/core-menu-button.html">
+<link rel="import" href="../core-item/core-item.html">
+<link rel="import" href="../core-pages/core-pages.html">
+<link rel="import" href="../core-layout-grid/core-layout-grid.html">
+<link rel="import" href="../core-localstorage/core-localstorage.html">
 <link rel="import" href="../solr-search/solr-search.html">
+<link rel="import" href="../core-ajax/core-ajax.html">
 
 <link rel="import" href="solr-docs-view.html">
 
@@ -42,24 +43,24 @@
                 background-color: rgba(128, 128, 128, 0.5);
                 z-index: 1;
             }
-            polymer-ui-toolbar#toolbar {
+            core-toolbar#toolbar {
                 background: #4285f4 !important;
                 z-index: 1 !important;
             }
-            polymer-ui-field {
+            core-field {
                 background: white;
                 height: 40px;
                 width: 300px;
                 margin: 10px;
             }
-            polymer-ui-menu-button {
+            core-menu-button {
                 padding-right: 10px;
             }
-            polymer-ui-pages {
+            core-pages {
                 display: block;
                 height: 100%;
             }
-            polymer-ui-pages > * {
+            core-pages > * {
                 display: block;
                 background: #f2f2f2;
                 overflow: auto;
@@ -84,57 +85,56 @@
             }
         </style>
 
-        <polymer-ui-toolbar id="toolbar" offscreen="basement" theme="polymer-ui-light-theme">
-            <polymer-ui-icon-button icon="menu" on-tap="{{toggleMenu}}" ></polymer-ui-icon-button>
+        <core-toolbar id="toolbar" offscreen="basement" theme="core-light-theme">
+            <core-icon-button icon="menu" on-tap="{{toggleMenu}}" ></core-icon-button>
             <div flex></div>
-            <polymer-ui-field hidden?="{{viewSelected}}">
-            <polymer-ui-icon icon="search"></polymer-ui-icon>
+            <core-field hidden?="{{viewSelected}}">
+            <core-icon icon="search"></core-icon>
             <input id="input" placeholder="Search docs" value="{{query}}" flex x-webkit-speech on-change="{{search}}">
-            </polymer-ui-field>
-            <polymer-ui-menu-button selected="{{bioTypeSelected}}" halign="right" icon="filter" hidden?="{{viewSelected}}">
-            <polymer-ui-menu-item name="wanted" label="Most Wanted"></polymer-ui-menu-item>
-            <polymer-ui-menu-item name="deceased" label="Deceased"></polymer-ui-menu-item>
-            <polymer-ui-menu-item name="all" label="All"></polymer-ui-menu-item>
-            </polymer-ui-menu-button>
+            </core-field>
+            <core-menu-button selected="{{docTypeSelected}}" halign="right" icon="filter" hidden?="{{viewSelected}}">
+            <core-item name="wanted" label="Most Wanted"></core-item>
+            <core-item name="deceased" label="Deceased"></core-item>
+            <core-item name="all" label="All"></core-item>
+            </core-menu-button>
             <div flex></div>
-        </polymer-ui-toolbar>
+        </core-toolbar>
 
         <div id="main" offscreen="basement">
-            <polymer-ui-pages selected="{{viewSelected}}">
+            <core-pages selected="{{viewSelected}}">
 
-                <solr-docs-view id="searchView" docs="{{docs}}" on-ic-bio-favorite-toggle="{{toggleFavorite}}"></solr-docs-view>
-                <solr-docs-view id="favoritesView" bios="{{favorites}}" hideFavoriteIcon swipeable
+                <solr-docs-view id="searchView" docs="{{docs}}" on-solr-doc-favorite-toggle="{{toggleFavorite}}"></solr-docs-view>
+                <solr-docs-view id="favoritesView" docs="{{favorites}}" hideFavoriteIcon swipeable
                               on-doc-favorite-remove="{{removeFavorite}}"></solr-docs-view>
-            </polymer-ui-pages>
+            </core-pages>
         </div>
 
-        <div id="sidebar" offscreen="left" theme="polymer-ui-dark-icon">
-            <polymer-ui-toolbar><div class="sidebar-title">bios</div></polymer-ui-toolbar>
-            <polymer-ui-menu selected="{{viewSelected}}" on-polymer-activate="{{menuActivate}}" selectedClass="sidebar-menu-selected">
-                <polymer-ui-menu-item label="Search"></polymer-ui-menu-item>
-                <polymer-ui-menu-item label="Favorites"></polymer-ui-menu-item>
-            </polymer-ui-menu>
+        <div id="sidebar" offscreen="left" theme="core-dark-icon">
+            <core-toolbar><div class="sidebar-title">docs</div></core-toolbar>
+            <core-menu selected="{{viewSelected}}" on-core-activate="{{menuActivate}}" selectedClass="sidebar-menu-selected">
+                <core-item label="Search"></core-item>
+                <core-item label="Favorites"></core-item>
+            </core-menu>
         </div>
 
         <div id="scrim" on-tap="{{toggleMenu}}" offscreen="right"></div>
 
         <div class="loading-icon" loading?="{{loading}}"></div>
 
-        <polymer-grid-layout nodes="{{layoutNodes}}" layout="{{layout}}"></polymer-grid-layout>
+        <core-layout-grid nodes="{{layoutNodes}}" layout="{{layout}}"></core-layout-grid>
 
-        <solr-search id="solrSearch"
-                     url="http://localhost:8983/solr/collection1/select/"
-                     query="{{query}}"
-                     on-solr-response="{{gotdocs}}">
-        </solr-search>
+        <core-ajax id="solrSearch"
+                   url="http://localhost:8983/solr/collection1/select/?indent=on&wt=json&q={{query}}"
+                   on-core-response="{{gotdocs}}"
+                   handleAs="json" ></core-ajax>
 
-        <polymer-localstorage name="bio-search" value="{{favorites}}"></polymer-localstorage>
+        <core-localstorage name="doc-search" value="{{favorites}}"></core-localstorage>
     </template>
     <script>
         Polymer('solr-search-app', {
             viewSelected: 0,
             query: '',
-            bioTypeSelected: 'all',
+            docTypeSelected: 'all',
             layouts: {
                 main:[
                     [1, 1],
@@ -159,7 +159,7 @@
             menuActivate: function() {
                 this.async('toggleMenu');
             },
-            bioTypeSelectedChanged: function() {
+            docTypeSelectedChanged: function() {
                 this.async('search');
             },
             search: function() {
@@ -172,21 +172,21 @@
                 this.$.searchView.selected = null;
                 this.$.searchView.scrollTop = 0;
                 this.docs = detail.response.response.docs;
-                console.log(JSON.stringify(this.docs));
+                //console.log(JSON.stringify(this.docs));
             },
             toggleFavorite: function(e, detail) {
                 this.favorites = this.favorites || [];
                 if (detail.active) {
-                    this.favorites.push(detail.bio);
+                    this.favorites.push(detail.doc);
                 } else {
-                    var i = this.favorites.indexOf(detail.bio);
+                    var i = this.favorites.indexOf(detail.doc);
                     if (i >= 0) {
                         this.favorites.splice(i, 1);
                     }
                 }
             },
             removeFavorite: function(e, detail, sender) {
-                this.toggleFavorite(e, {active: false, bio: detail.bio});
+                this.toggleFavorite(e, {active: false, doc: detail.doc});
             }
         });
     </script>

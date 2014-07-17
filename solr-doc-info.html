@@ -1,7 +1,7 @@
 <link rel="import" href="solr-toggle-icon.html">
 <link rel="import" href="solr-info-field.html">
-<link rel="import" href="../polymer-ui-collapsible/polymer-ui-collapsible.html">
-<link rel="import" href="../polymer-ui-icon/polymer-ui-icon.html">
+<link rel="import" href="../core-collapse/core-collapse.html">
+<link rel="import" href="../core-icon/core-icon.html">
 <link rel="import" href="../polymer-ui-ratings/polymer-ui-ratings.html">
 
 <polymer-element name="solr-doc-info" attributes="doc active hideFavoriteIcon">
@@ -65,17 +65,18 @@
             </div>
         </div>
 
-        <polymer-ui-collapsible class="more-info" active="{{active}}">
+        <core-collapse class="more-info" opened="{{active}}">
             <div class="link-icon-container">
                 <a target="_blank" href="{{doc.infoLink}}">
-                    <polymer-ui-icon icon="shortcut" theme="polymer-ui-light-theme"></polymer-ui-icon>
+                    <core-icon icon="shortcut" theme="polymer-ui-light-theme"></core-icon>
                 </a>
             </div>
             <solr-info-field label="Name" value="{{doc.name}}"></solr-info-field>
-        </polymer-ui-collapsible>
+        </core-collapse>
     </template>
     <script>
         Polymer('solr-doc-info', {
+            active: false,
             hideFavoriteIcon: false,
             toggleFavorite: function(e, detail, sender) {
                 this.fire('solr-doc-favorite-toggle',
